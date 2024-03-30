@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio File Uploader</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <style>
+    /* Add custom styles here */
+    body {
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="mt-5 mb-4">Audio File Uploader</h1>
+
+    <!-- Manual -->
+    <div class="mb-4">
+      <p>Welcome to the Audio File Uploader!</p>
+      <p>Please use the form below to upload your audio file. Ensure the file is either in WAV or FLAC format.</p>
+      <p>Enter a sequential number and the desired name for your file.</p>
+    </div>
+
+    <!-- Form -->
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div class="mb-3">
+        <label for="audioFile" class="form-label">Select Audio File (WAV or FLAC)</label>
+        <input class="form-control" type="file" id="audioFile" name="audioFile" accept=".wav, .flac" required>
+      </div>
+      <div class="mb-3">
+        <label for="fileNumber" class="form-label">File Number</label>
+        <input class="form-control" type="number" id="fileNumber" name="fileNumber" required>
+      </div>
+      <div class="mb-3">
+        <label for="fileName" class="form-label">File Name</label>
+        <input class="form-control" type="text" id="fileName" name="fileName" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Upload</button>
+    </form>
+    <!-- Display messages -->
+    <div id="message" class="mt-3"></div>
+  </div>
+
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+  <!-- Custom JavaScript -->
+  <script>
+    // Add custom JavaScript here
+    const form = document.getElementById('uploadForm');
+    const messageDiv = document.getElementById('message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        showMessage(data.message);
+      } catch (error) {
+        showMessage('An error occurred. Please try again later.');
+      }
+    });
+
+    function showMessage(message) {
+      messageDiv.innerHTML = `<div class="alert alert-info">${message}</div>`;
+    }
+  </script>
+</body>
+</html>
