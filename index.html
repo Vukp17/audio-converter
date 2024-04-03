@@ -63,7 +63,7 @@
       const formData = new FormData(form);
       
       try {
-        const response = await fetch('/upload', {
+        const response = await fetch('localhost:5000/upload', {
           method: 'POST',
           body: formData
         });
