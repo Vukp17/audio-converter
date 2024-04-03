@@ -1,9 +1,8 @@
-from flask import Flask, request, jsonify
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import os
-from datetime import datetime
+import cgi
+from urllib.parse import urlparse
 from pydub import AudioSegment
-
-app = Flask(__name__)
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'wav', 'flac'}
@@ -16,36 +15,73 @@ def convert_audio(input_file, output_file):
     audio = audio.set_frame_rate(16000).set_channels(1).set_sample_width(2)
     audio.export(output_file, format='wav')
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'audioFile' not in request.files:
-        return jsonify({'message': 'No file part'}), 400
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        
+        # Preveri, če je zahtevek namenjen poti /upload
+        if urlparse(self.path).path != '/upload':
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write("404 Not Found".encode())
+            return
 
-    file = request.files['audioFile']
-    if file.filename == '':
-        return jsonify({'message': 'No selected file'}), 400
+        content_type, pdict = cgi.parse_header(self.headers.get('content-type',''))
+        if content_type != 'multipart/form-data':
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write('POST request is multipart/form-data ! \n'.encode())
+            return
 
-    if file and allowed_file(file.filename):
-        file_number = request.form['fileNumber']
-        file_name = request.form['fileName']
-        filename = f"{file_number}_{file_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.wav"
-        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={'REQUEST_METHOD': 'POST', 'CONTENT_TYPE': self.headers['Content-Type']}
+        )
 
-        # Perform conversion if necessary
-        if file.filename.lower().endswith('.flac'):
-            input_file = os.path.join(UPLOAD_FOLDER, filename)
-            output_file = os.path.join(UPLOAD_FOLDER, filename.replace('.flac', '.wav'))
-            convert_audio(input_file, output_file)
-            os.remove(input_file)  # Remove original FLAC file
-            filename = filename.replace('.flac', '.wav')
+        if 'file' not in form:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write("No file part".encode())
+            return
 
-        return jsonify({
-            'message': 'File uploaded successfully',
-            'filename': filename,
-            'format': '16-bit PCM, 16 KSPS, MONO'
-        }), 200
+        file_item = form['file']
+        if file_item.filename:
+            filename = os.path.basename(file_item.filename)
+            if allowed_file(filename):
+                if not os.path.exists(UPLOAD_FOLDER):
+                    os.makedirs(UPLOAD_FOLDER)
 
-    return jsonify({'message': 'Invalid file format'}), 400
+                file_path = os.path.join(UPLOAD_FOLDER, filename)
+                with open(file_path, 'wb') as output_file:
+                    output_file.write(file_item.file.read())
 
-if __name__ == '__main__':
-    app.run(debug=True)
+                # Preveri in izvedi pretvorbo, če je potrebno
+                if filename.lower().endswith('.flac'):
+                    wav_filename = filename.rsplit('.', 1)[0] + '.wav'
+                    wav_path = os.path.join(UPLOAD_FOLDER, wav_filename)
+                    convert_audio(file_path, wav_path)
+                    os.remove(file_path)  # Odstrani originalno datoteko
+                else:
+                    wav_path = file_path
+                    convert_audio(file_path, wav_path)
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(f"File uploaded and processed successfully: {wav_path}".encode())
+            else:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write("Invalid file format".encode())
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write("No selected file".encode())
+
+def run(server_class=HTTPServer, handler_class=SimpleHTTPRequestHandler, port=8000):
+    server_address = ('', port)
+    httpd = server_class(server_address, handler_class)
+    print(f"Starting httpd on port {port}...")
+    httpd.serve_forever()
+
+if __name__ == "__main__":
+    run()

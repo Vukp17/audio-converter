@@ -71,7 +71,8 @@
                 const formData = new FormData(form);
 
                 try {
-                    const response = await fetch("/upload", {
+                  // Posljemo request na streznik 
+                    const response = await fetch("http://164.8.67.103:8000/upload", {
                         method: "POST",
                         body: formData,
                     });
