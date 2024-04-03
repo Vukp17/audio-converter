@@ -1,0 +1,24 @@
+//Phthon 
+python3 --version
+
+//Instlll python dependency manager
+sudo pip3 install pydub --user
+
+
+//ffmpeg
+sudo dnf install epel-release
+// EPEL (Extra Packages for Enterprise Linux)
+sudo dnf install epel-release
+//free licence
+sudo dnf install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm
+
+sudo dnf install ffmpeg
+
+//verify
+
+ffmpeg -version
+
+enable firewall 
+sudo firewall-cmd --zone=public --add-port=8000/tcp
+sudo firewall-cmd --list-all
+
