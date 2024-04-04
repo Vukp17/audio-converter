@@ -96,7 +96,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                     os.makedirs(UPLOAD_FOLDER)
 
                 file_extension = filename.split('.')[-1]
-                wav_filename = f"{sequence_number}_{datetime.now().strftime('%Y-%m-%d_%H%M%S')}.wav"
+                wav_filename = f"{sequence_number}_{datetime.now().strftime('%Y-%m-%d_%H')}.wav"
                 wav_path = os.path.join(UPLOAD_FOLDER, wav_filename)
 
                 # Check if file with the same name already exists
