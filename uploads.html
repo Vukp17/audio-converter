@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Audio File Uploader</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* CSS  */
+        body {
+
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+        }
+
+        .container-fluid {
+            margin-bottom: auto;
+            flex-direction: column;
+
+        }
+
+        .nav flex-column {
+            margin-right: auto;
+
+        }
+
+        .container {
+            max-width: 500px;
+	
+
+        }
+
+        .footer {
+            margin-top: auto;
+	    margin-left: auto;
+	}
+	
+
+
+
+.container2 {
+    display: flex;
+}
+
+.list-container {
+    flex: 1; 
+}
+
+.list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.list li, h4{
+ margin: 50px;   
+    padding: 10px;
+display: inline-block;
+white-space: nowrap;
+	width: max;
+}
+
+    </style>
+
+<style>
+	.dropbtn {
+  background-color: #b3e6ff;
+  color: black;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+  background-color: #80d4ff;
+}
+
+.dropdown {
+  float: right;
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #c2c2d6;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  right: 0;
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown a:hover {background-color: #ddd;}
+
+.show {display: block;}
+</style>
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="../">
+                Audio File Uploader
+            </a>
+            <a href="https://github.com/Vukp17/audio-converter" target="_blank">
+                <i class="fab fa-github fa-2x"></i>
+            </a>
+
+
+            <nav class="nav flex-column">
+                <a class="nav-link active" href="uploads">Uploaded files</a>
+                <a class="nav-link" href="logs">Logs</a>
+
+
+            </nav>
+        </div>    
+    </nav>
+ 
+
+
+
+
+<div class="container2">
+    <div class="list-container">
+	    <h4> Filename </h4>
+	        <ul class="list" id="data">
+        </ul>
+    </div>
+    <div class="list-container">
+	    <h4> Created </h4>
+        <ul class="list" id="data2">
+            
+        </ul>
+    </div>
+        <div class="list-container">
+		<h4> Modified </h4>
+        <ul class="list" id="data3">
+           
+        </ul>
+    </div>
+        <div class="list-container">
+<h4> Size </h4>
+        <ul class="list" id="data4">
+            
+        </ul>
+    </div>
+</div>
+	</div>
+
+	<!--<div id="list5">
+	<h4> Download </h4>
+	<div id="data5">
+	</div>
+	</div>-->
+
+	
+	 <div class="dropdown">
+ 	 <button onclick="sort()" class="dropbtn">Sort</button>
+  <div id="myDropdown" class="dropdown-content">
+    <a onclick=sortName()>By name</a>
+    <a onclick=sortCreated()>By time created</a>
+    <a onclick=sortModified()>By time modified</a>
+    <a onclick=sortSize()>By size</a>
+  </div>
+</div>
+
+   <script>
+
+	   function sort() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown menu if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+
+   </script>
+
+   <script>
+	function sortName(){
+		    fetch("uploads.json")
+        .then(x => x.json())
+	.then(y => {
+	
+               
+	
+		y.sort((a,b) => {
+			if(a.filename < b.filename) {
+				return -1;
+			}
+			if(a.filename > b.filename) {
+				return 1;
+			}
+			return 0;
+		});
+		
+		document.getElementById("data").innerHTML="";
+		document.getElementById("data2").innerHTML="";
+		document.getElementById("data3").innerHTML="";
+		document.getElementById("data4").innerHTML="";
+
+		//console.log(y)
+
+		const container = document.getElementById("data");
+		const container2 = document.getElementById("data2");
+		const container3 = document.getElementById("data3");
+		const container4 = document.getElementById("data4");
+		
+
+				y.forEach(item => {
+		const filename = item.filename;
+		const cdate = new Date(item.ctime*1000); // convert unix time
+		const mdate = new Date(item.mtime*1000); // covert unix time
+		const size = item.size;
+
+		const listItem = document.createElement("li");
+		const listItem2 = document.createElement("li");
+		const listItem3 = document.createElement("li");
+		const listItem4 = document.createElement("li");
+
+		const text = document.createElement("text");
+		const created = document.createElement("created");
+		const modified = document.createElement("modified");
+		const siz = document.createElement("siz");
+
+
+
+
+		text.textContent = filename;
+		created.textContent = cdate.toLocaleString("sl-SI");;
+		modified.textContent = mdate.toLocaleString("sl-SI");
+		siz.textContent = size/10000000+"MB";
+
+	
+		listItem.appendChild(text);
+		listItem2.appendChild(created);		
+		listItem3.appendChild(modified);
+		listItem4.appendChild(siz);
+	
+	
+	
+		
+        	container.appendChild(listItem);
+		container2.appendChild(listItem2);
+		container3.appendChild(listItem3);
+		container4.appendChild(listItem4);
+
+
+		});
+        })
+        .catch(error => {
+                console.log("cant fetch data");  
+        });
+
+	}
+	
+function sortCreated(){
+
+	  fetch("uploads.json")
+        .then(x => x.json())
+	.then(y => {
+	
+               
+	
+		y.sort((a,b) => {
+			if(a.ctime < b.ctime) {
+				return -1;
+			}
+			if(a.ctime > b.ctime) {
+				return 1;
+			}
+			return 0;
+		});
+		
+		document.getElementById("data").innerHTML="";
+		document.getElementById("data2").innerHTML="";
+		document.getElementById("data3").innerHTML="";
+		document.getElementById("data4").innerHTML="";
+
+		//console.log(y)
+
+		const container = document.getElementById("data");
+		const container2 = document.getElementById("data2");
+		const container3 = document.getElementById("data3");
+		const container4 = document.getElementById("data4");
+		
+
+				y.forEach(item => {
+		const filename = item.filename;
+		const cdate = new Date(item.ctime*1000); // convert unix time
+		const mdate = new Date(item.mtime*1000); // covert unix time
+		const size = item.size;
+
+		const listItem = document.createElement("li");
+		const listItem2 = document.createElement("li");
+		const listItem3 = document.createElement("li");
+		const listItem4 = document.createElement("li");
+
+		const text = document.createElement("text");
+		const created = document.createElement("created");
+		const modified = document.createElement("modified");
+		const siz = document.createElement("siz");
+
+
+
+
+		text.textContent = filename;
+		created.textContent = cdate.toLocaleString("sl-SI");;
+		modified.textContent = mdate.toLocaleString("sl-SI");
+		siz.textContent = size/10000000+"MB";
+
+		
+
+		
+		listItem.appendChild(text);
+		listItem2.appendChild(created);		
+		listItem3.appendChild(modified);
+		listItem4.appendChild(siz);
+	
+	
+	
+		
+        	container.appendChild(listItem);
+		container2.appendChild(listItem2);
+		container3.appendChild(listItem3);
+		container4.appendChild(listItem4);
+
+
+		});
+        })
+        .catch(error => {
+                console.log("cant fetch data");  
+        });
+}
+
+function sortModified(){
+
+
+	    fetch("uploads.json")
+        .then(x => x.json())
+	.then(y => {
+	
+               
+	
+		y.sort((a,b) => {
+			if(a.mtime < b.mtime) {
+				return -1;
+			}
+			if(a.mtime > b.mtime) {
+				return 1;
+			}
+			return 0;
+		});
+		
+		document.getElementById("data").innerHTML="";
+		document.getElementById("data2").innerHTML="";
+		document.getElementById("data3").innerHTML="";
+		document.getElementById("data4").innerHTML="";
+
+		//console.log(y)
+
+		const container = document.getElementById("data");
+		const container2 = document.getElementById("data2");
+		const container3 = document.getElementById("data3");
+		const container4 = document.getElementById("data4");
+		
+
+				y.forEach(item => {
+		const filename = item.filename;
+		const cdate = new Date(item.ctime*1000); // convert unix time
+		const mdate = new Date(item.mtime*1000); // covert unix time
+		const size = item.size;
+
+		const listItem = document.createElement("li");
+		const listItem2 = document.createElement("li");
+		const listItem3 = document.createElement("li");
+		const listItem4 = document.createElement("li");
+
+		const text = document.createElement("text");
+		const created = document.createElement("created");
+		const modified = document.createElement("modified");
+		const siz = document.createElement("siz");
+
+
+
+
+		text.textContent = filename;
+		created.textContent = cdate.toLocaleString("sl-SI");;
+		modified.textContent = mdate.toLocaleString("sl-SI");
+		siz.textContent = size/10000000+"MB";
+
+	
+		listItem.appendChild(text);
+		listItem2.appendChild(created);		
+		listItem3.appendChild(modified);
+		listItem4.appendChild(siz);
+	
+	
+	
+		
+        	container.appendChild(listItem);
+		container2.appendChild(listItem2);
+		container3.appendChild(listItem3);
+		container4.appendChild(listItem4);
+
+
+		});
+        })
+        .catch(error => {
+                console.log("cant fetch data");  
+        });
+
+}
+
+function sortSize(){
+
+
+
+	    fetch("uploads.json")
+        .then(x => x.json())
+	.then(y => {
+	
+               
+	
+		y.sort((a,b) => {
+			if(a.size < b.size) {
+				return -1;
+			}
+			if(a.size > b.size) {
+				return 1;
+			}
+			return 0;
+		});
+		
+		document.getElementById("data").innerHTML="";
+		document.getElementById("data2").innerHTML="";
+		document.getElementById("data3").innerHTML="";
+		document.getElementById("data4").innerHTML="";
+
+		//console.log(y)
+
+		const container = document.getElementById("data");
+		const container2 = document.getElementById("data2");
+		const container3 = document.getElementById("data3");
+		const container4 = document.getElementById("data4");
+		
+
+				y.forEach(item => {
+		const filename = item.filename;
+		const cdate = new Date(item.ctime*1000); // convert unix time
+		const mdate = new Date(item.mtime*1000); // covert unix time
+		const size = item.size;
+
+		const listItem = document.createElement("li");
+		const listItem2 = document.createElement("li");
+		const listItem3 = document.createElement("li");
+		const listItem4 = document.createElement("li");
+
+		const text = document.createElement("text");
+		const created = document.createElement("created");
+		const modified = document.createElement("modified");
+		const siz = document.createElement("siz");
+
+
+
+
+		text.textContent = filename;
+		created.textContent = cdate.toLocaleString("sl-SI");;
+		modified.textContent = mdate.toLocaleString("sl-SI");
+		siz.textContent = size/10000000+"MB";
+
+	
+		listItem.appendChild(text);
+		listItem2.appendChild(created);		
+		listItem3.appendChild(modified);
+		listItem4.appendChild(siz);
+	
+	
+	
+		
+        	container.appendChild(listItem);
+		container2.appendChild(listItem2);
+		container3.appendChild(listItem3);
+		container4.appendChild(listItem4);
+
+
+		});
+        })
+        .catch(error => {
+                console.log("cant fetch data");  
+        });
+
+
+
+
+}
+
+
+   </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script>
+
+        fetch("uploads.json")
+        .then(x => x.json())
+	.then(y => {
+	
+                console.log(y)
+
+		const container = document.getElementById("data");
+		const container2 = document.getElementById("data2");
+		const container3 = document.getElementById("data3");
+		const container4 = document.getElementById("data4");
+		//const container5 = document.getElementById("data5");
+
+		y.forEach(item => {
+		const filename = item.filename;
+		const cdate = new Date(item.ctime*1000); // convert unix time
+		const mdate = new Date(item.mtime*1000); // covert unix time
+		const size = item.size;
+		//const link = "Download"
+
+		const listItem = document.createElement("li");
+		const listItem2 = document.createElement("li");
+		const listItem3 = document.createElement("li");
+		const listItem4 = document.createElement("li");
+		//const listItem5 = document.createElement("li");
+
+		const text = document.createElement("text");
+		const created = document.createElement("created");
+		const modified = document.createElement("modified");
+		const siz = document.createElement("siz");
+		//const button = document.createElement("button");
+		
+		//button.setAttribute("class", "btn btn-primary btn-sm");
+		
+
+		//const a = document.createElement("a");
+		
+		
+
+			
+		//a.setAttribute("href", "uploads/"+filename);	
+		//a.setAttribute("download", "");
+		
+		
+		
+		text.textContent = filename;
+		created.textContent = cdate.toLocaleString("sl-SI");
+		modified.textContent = mdate.toLocaleString("sl-SI");
+		siz.textContent = size/10000000+"MB";
+		//a.textContent = link;
+
+		//button.appendChild(a);
+
+		listItem.appendChild(text);
+		listItem2.appendChild(created);		
+		listItem3.appendChild(modified);
+		listItem4.appendChild(siz);
+		//listItem5.appendChild(button);
+		
+		console.log(created)
+	
+		
+        	container.appendChild(listItem);
+		container2.appendChild(listItem2);
+		container3.appendChild(listItem3);
+		container4.appendChild(listItem4);
+		//container5.appendChild(listItem5);
+
+
+		});
+        })
+        .catch(error => {
+                console.log("cant fetch data");  
+        });
+    </script>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
+<footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+        <span class="text-muted">Made by Team of TK students</span>
+
+    </div>
+</footer>
+
+</html>
